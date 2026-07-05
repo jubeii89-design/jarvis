@@ -1,0 +1,132 @@
+// J.A.R.V.I.S. — Just A Rather Very Intelligent System
+// Prisma schema: 4-tier memory architecture + knowledge graph + research log
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// TIER 1 — SENSORY BUFFER
+// Volatile raw input stream (kept brief, mirrors human iconic memory).
+// In production this would be in-RAM; we persist a small audit trail here.
+// ───────────────────────────────────────────────────────────────────────────
+model SensoryBuffer {
+  id        String   @id @default(cuid())
+  sessionId String
+  modality  String   // text | voice | image | system
+  rawInput  String
+  metadata  String?  // JSON blob: ts, source, language, etc.
+  receivedAt DateTime @default(now())
+
+  session Session? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, receivedAt])
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// TIER 2 — SHORT-TERM MEMORY (Working Memory)
+// The active conversation window. Bounded by capacity (last N turns).
+// ───────────────────────────────────────────────────────────────────────────
+model ShortTermMemory {
+  id        String   @id @default(cuid())
+  sessionId String
+  role      String   // user | assistant | system | tool
+  content   String
+  tokens    Int      @default(0)
+  relevance Float    @default(1.0) // decays over time
+  createdAt DateTime @default(now())
+
+  session Session? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// TIER 3 — EPISODIC MEMORY (Long-Term Vector Log)
+// Each entry = one "episode" (a meaningful interaction) with a vector
+// embedding so we can retrieve semantically similar past episodes.
+// ───────────────────────────────────────────────────────────────────────────
+model EpisodicMemory {
+  id          String   @id @default(cuid())
+  sessionId   String
+  episodeText String   // human-readable summary of the episode
+  embedding   String   // JSON array of floats (vector)
+  vectorDim   Int      @default(768)
+  tags        String?  // comma-separated topic tags
+  emotion     String?  // optional affective tag
+  importance  Float    @default(0.5) // 0..1, drives retention
+  createdAt   DateTime @default(now())
+  lastRecalled DateTime? @default(now())
+
+  session Session? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+  @@index([importance])
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// TIER 4 — SEMANTIC MEMORY (Core Knowledge Graph)
+// Entities + relationships. This is JARVIS's structured world model.
+// ───────────────────────────────────────────────────────────────────────────
+model Entity {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  type        String   // person | place | concept | project | device | skill
+  description String?
+  attributes  String?  // JSON blob of key/value pairs
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sourcesAsSubject EntityRelation[] @relation("subject")
+  sourcesAsObject  EntityRelation[] @relation("object")
+}
+
+model EntityRelation {
+  id         String   @id @default(cuid())
+  subjectId  String
+  objectId   String
+  predicate  String   // knows | built | located_in | member_of | depends_on | ...
+  weight     Float    @default(1.0) // confidence / strength
+  evidence   String?  // JSON: source citations
+  createdAt  DateTime @default(now())
+
+  subject Entity @relation("subject", fields: [subjectId], references: [id], onDelete: Cascade)
+  object  Entity @relation("object", fields: [objectId], references: [id], onDelete: Cascade)
+
+  @@index([subjectId])
+  @@index([objectId])
+  @@index([predicate])
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// RESEARCH LOG
+// Persistent record of every web research operation JARVIS performs.
+// ───────────────────────────────────────────────────────────────────────────
+model ResearchLog {
+  id          String   @id @default(cuid())
+  query       String
+  strategy    String   // keyword | semantic | follow_up
+  resultCount Int      @default(0)
+  topSources  String?  // JSON array of {title, url, snippet}
+  summary     String?  // synthesized answer
+  createdAt   DateTime @default(now())
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// SESSION (umbrella for a user's continuous interaction)
+// ───────────────────────────────────────────────────────────────────────────
+model Session {
+  id        String   @id @default(cuid())
+  label     String?
+  startedAt DateTime @default(now())
+  lastActive DateTime @updatedAt
+
+  sensory     SensoryBuffer[]
+  shortTerm   ShortTermMemory[]
+  episodes    EpisodicMemory[]
+}

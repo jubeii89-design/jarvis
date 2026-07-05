@@ -1,0 +1,87 @@
+{
+  "nodes": [
+    {
+      "slug": "jarvis-architecture-overview",
+      "title": "JARVIS Architecture Overview",
+      "type": "concepts",
+      "compiled": true
+    },
+    {
+      "slug": "jarvis-personality-spec",
+      "title": "JARVIS Personality Spec",
+      "type": "concepts",
+      "compiled": true
+    },
+    {
+      "slug": "nuclear-fusion-energy-breakthroughs-2025",
+      "title": "Nuclear Fusion Energy Breakthroughs 2025",
+      "type": "concepts",
+      "compiled": true
+    },
+    {
+      "slug": "the-4-tier-memory-architecture",
+      "title": "The 4-Tier Memory Architecture",
+      "type": "concepts",
+      "compiled": true
+    }
+  ],
+  "edges": [
+    {
+      "source": "jarvis-architecture-overview",
+      "target": "jarvis-personality-spec"
+    },
+    {
+      "source": "jarvis-architecture-overview",
+      "target": "the-4-tier-memory-architecture"
+    },
+    {
+      "source": "jarvis-architecture-overview",
+      "target": "nuclear-fusion-energy-breakthroughs-2025"
+    },
+    {
+      "source": "jarvis-personality-spec",
+      "target": "jarvis-architecture-overview"
+    },
+    {
+      "source": "jarvis-personality-spec",
+      "target": "the-4-tier-memory-architecture"
+    },
+    {
+      "source": "jarvis-personality-spec",
+      "target": "jarvis-personality-spec"
+    },
+    {
+      "source": "jarvis-personality-spec",
+      "target": "nuclear-fusion-energy-breakthroughs-2025"
+    },
+    {
+      "source": "nuclear-fusion-energy-breakthroughs-2025",
+      "target": "the-4-tier-memory-architecture"
+    },
+    {
+      "source": "nuclear-fusion-energy-breakthroughs-2025",
+      "target": "jarvis-architecture-overview"
+    },
+    {
+      "source": "nuclear-fusion-energy-breakthroughs-2025",
+      "target": "jarvis-personality-spec"
+    },
+    {
+      "source": "the-4-tier-memory-architecture",
+      "target": "jarvis-architecture-overview"
+    },
+    {
+      "source": "the-4-tier-memory-architecture",
+      "target": "the-4-tier-memory-architecture"
+    },
+    {
+      "source": "the-4-tier-memory-architecture",
+      "target": "jarvis-personality-spec"
+    },
+    {
+      "source": "the-4-tier-memory-architecture",
+      "target": "nuclear-fusion-energy-breakthroughs-2025"
+    }
+  ],
+  "generatedAt": "2026-07-04T05:23:20.580Z"
+}
